@@ -1,0 +1,89 @@
+```html
+<ion-header [translucent]="true">
+  <ion-toolbar color="warning">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home" text="Atrás"></ion-back-button>
+    </ion-buttons>
+    
+    <ion-title>{{ restaurante?.nombre || 'Cargando...' }}</ion-title>
+
+    <ion-buttons slot="end">
+      <ion-button (click)="toggleFavorito()" [disabled]="!restaurante">
+        <ion-icon slot="icon-only" [name]="esFavorito ? 'heart' : 'heart-outline'" [color]="esFavorito ? 'danger' : 'dark'"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div *ngIf="restaurante; else cargando">
+    <img [src]="restaurante.imagen" [alt]="restaurante.nombre" style="width: 100%; height: 280px; object-fit: cover;" />
+    
+    <div class="ion-padding">
+      <h1 style="font-weight: 800; margin-top: 0; margin-bottom: 5px;">{{ restaurante.nombre }}</h1>
+      <p style="color: gray; margin-top: 0;">📍 A {{ restaurante.distancia }} de tu ubicación</p>
+      
+      <p style="font-size: 1.1em; line-height: 1.5;">{{ restaurante.descripcion }}</p>
+
+      <ion-grid class="ion-no-padding ion-margin-top">
+        <ion-row>
+          <ion-col size="6">
+            <ion-button expand="block" color="success" (click)="irAlLocal()">
+              <ion-icon name="navigate" slot="start"></ion-icon>
+              Ir al local
+            </ion-button>
+          </ion-col>
+          <ion-col size="6">
+            <ion-button expand="block" color="dark" fill="outline" (click)="compartir()">
+              <ion-icon name="share-social" slot="start"></ion-icon>
+              Compartir
+            </ion-button>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+
+      <h2 class="ion-margin-top" style="font-weight: bold;">Reseñas de Voz</h2>
+      <ion-list lines="full">
+        <ion-item>
+          <ion-avatar slot="start">
+            <img src="https://ionicframework.com/docs/img/demos/avatar.svg" />
+          </ion-avatar>
+          <ion-label>
+            <h2>Ana García</h2>
+            <p>⭐ 5.0 • Hace 2 días</p>
+          </ion-label>
+          <ion-button fill="clear" slot="end" color="primary">
+            <ion-icon name="play-circle" style="font-size: 32px;"></ion-icon>
+          </ion-button>
+        </ion-item>
+      </ion-list>
+
+      <!-- ✅ NUEVO: Mostrar la foto capturada -->
+      <div *ngIf="fotoCapturada" class="ion-margin-top">
+        <h2 style="font-weight: bold;">Tu Foto</h2>
+        <img 
+          [src]="fotoCapturada" 
+          style="width: 100%; border-radius: 12px; box-shadow: 0px 4px 10px rgba(0,0,0,0.2); object-fit: cover; max-height: 300px;" 
+        />
+      </div>
+
+    </div>
+  </div>
+
+  <ng-template #cargando>
+    <div class="ion-padding">
+      <ion-skeleton-text animated style="width: 100%; height: 280px;"></ion-skeleton-text>
+      <ion-skeleton-text animated style="width: 80%; margin-top: 20px; height: 30px;"></ion-skeleton-text>
+      <ion-skeleton-text animated style="width: 60%; height: 20px;"></ion-skeleton-text>
+    </div>
+  </ng-template>
+
+  <!-- ✅ MODIFICADO: Botón conectado a la cámara -->
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button color="warning" (click)="tomarFoto()">
+      <ion-icon name="camera" color="dark"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+
+</ion-content>
+```

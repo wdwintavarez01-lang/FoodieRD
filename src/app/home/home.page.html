@@ -1,20 +1,32 @@
 <ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Blank
-    </ion-title>
+  <ion-toolbar color="warning">
+    <ion-title class="ion-text-center"><b>Foodie RD</b></ion-title>
+  </ion-toolbar>
+  <ion-toolbar color="warning">
+    <ion-searchbar animated="true" placeholder="Buscar restaurantes..."></ion-searchbar>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Blank</ion-title>
-    </ion-toolbar>
-  </ion-header>
-
-  <div id="container">
-    <strong>Ready to create an app?</strong>
-    <p>Start with Ionic <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a></p>
+<ion-content [fullscreen]="true" color="light">
+  <div class="ion-padding-horizontal ion-padding-top" style="display: flex; overflow-x: auto; gap: 8px;">
+    <ion-chip color="dark"><ion-label>Criollo</ion-label></ion-chip>
+    <ion-chip color="dark"><ion-label>Mariscos</ion-label></ion-chip>
+    <ion-chip color="dark"><ion-label>Postres</ion-label></ion-chip>
   </div>
+
+  <ion-list lines="none" class="ion-padding-bottom" style="background: transparent;">
+    <ion-card mode="ios" *ngFor="let restaurante of restaurantes" (click)="verDetalle(restaurante)" class="ion-margin-bottom">
+      <img [src]="restaurante.imagen" [alt]="restaurante.nombre" style="height: 180px; width: 100%; object-fit: cover;" />
+      <ion-card-header>
+        <ion-card-title>{{ restaurante.nombre }}</ion-card-title>
+        <ion-card-subtitle color="primary">{{ restaurante.categoria }} • {{ restaurante.distancia }}</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="color: #666;">⭐ <b>{{ restaurante.calificacion }}</b> (120 reseñas)</span>
+          <ion-icon name="chevron-forward-outline" color="medium"></ion-icon>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </ion-list>
 </ion-content>
