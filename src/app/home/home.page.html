@@ -1,32 +1,105 @@
-<ion-header [translucent]="true">
+<ion-header class="ion-no-border">
   <ion-toolbar color="warning">
-    <ion-title class="ion-text-center"><b>Foodie RD</b></ion-title>
+    <ion-title class="home-title">FOODIE RD</ion-title>
   </ion-toolbar>
-  <ion-toolbar color="warning">
-    <ion-searchbar animated="true" placeholder="Buscar restaurantes..."></ion-searchbar>
+  <ion-toolbar color="warning" class="search-toolbar">
+    <ion-searchbar
+      placeholder="Buscar restaurantes, categoria o plato..."
+      (ionInput)="buscarRestaurante($event)"
+      animated="true">
+    </ion-searchbar>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true" color="light">
-  <div class="ion-padding-horizontal ion-padding-top" style="display: flex; overflow-x: auto; gap: 8px;">
-    <ion-chip color="dark"><ion-label>Criollo</ion-label></ion-chip>
-    <ion-chip color="dark"><ion-label>Mariscos</ion-label></ion-chip>
-    <ion-chip color="dark"><ion-label>Postres</ion-label></ion-chip>
+<ion-content color="light">
+  <div class="category-container">
+    <ion-chip
+      *ngFor="let cat of categorias"
+      [class.active-chip]="categoriaActiva === cat.value"
+      (click)="seleccionarCategoria(cat.value)">
+      <ion-label>{{ cat.label }}</ion-label>
+    </ion-chip>
   </div>
 
-  <ion-list lines="none" class="ion-padding-bottom" style="background: transparent;">
-    <ion-card mode="ios" *ngFor="let restaurante of restaurantes" (click)="verDetalle(restaurante)" class="ion-margin-bottom">
-      <img [src]="restaurante.imagen" [alt]="restaurante.nombre" style="height: 180px; width: 100%; object-fit: cover;" />
+  <section class="filters-panel">
+    <div class="filters-grid">
+      <label class="filter-field">
+        <span>Precio</span>
+        <select [(ngModel)]="filtros.precioMaximo" (change)="aplicarFiltros()">
+          <option [ngValue]="null">Todos</option>
+          <option [ngValue]="1">$</option>
+          <option [ngValue]="2">$$</option>
+          <option [ngValue]="3">$$$</option>
+          <option [ngValue]="4">$$$$</option>
+        </select>
+      </label>
+
+      <label class="filter-field">
+        <span>Calificacion minima</span>
+        <select [(ngModel)]="filtros.calificacionMinima" (change)="aplicarFiltros()">
+          <option [ngValue]="null">Todas</option>
+          <option [ngValue]="4.5">4.5+</option>
+          <option [ngValue]="4">4.0+</option>
+          <option [ngValue]="3.5">3.5+</option>
+        </select>
+      </label>
+
+      <label class="filter-field">
+        <span>Distancia maxima</span>
+        <select [(ngModel)]="filtros.distanciaMaximaKm" (change)="aplicarFiltros()">
+          <option [ngValue]="null">Cualquiera</option>
+          <option [ngValue]="1">1 km</option>
+          <option [ngValue]="3">3 km</option>
+          <option [ngValue]="5">5 km</option>
+          <option [ngValue]="10">10 km</option>
+        </select>
+      </label>
+
+      <label class="filter-field">
+        <span>Ordenar por</span>
+        <select [(ngModel)]="filtros.orden" (change)="aplicarFiltros()">
+          <option *ngFor="let opcion of opcionesOrden" [ngValue]="opcion.value">{{ opcion.label }}</option>
+        </select>
+      </label>
+    </div>
+
+    <ion-button fill="solid" size="small" color="dark" (click)="limpiarFiltrosAvanzados()">
+      Limpiar filtros
+    </ion-button>
+  </section>
+
+  <div *ngIf="cargando" class="card-stack">
+    <ion-card *ngFor="let i of [1,2,3]" class="restaurant-card">
+      <ion-skeleton-text animated style="height: 200px; width: 100%;"></ion-skeleton-text>
       <ion-card-header>
-        <ion-card-title>{{ restaurante.nombre }}</ion-card-title>
-        <ion-card-subtitle color="primary">{{ restaurante.categoria }} • {{ restaurante.distancia }}</ion-card-subtitle>
+        <ion-skeleton-text animated style="width: 70%; height: 20px;"></ion-skeleton-text>
+        <ion-skeleton-text animated style="width: 40%; height: 15px; margin-top: 5px;"></ion-skeleton-text>
+      </ion-card-header>
+    </ion-card>
+  </div>
+
+  <div *ngIf="!cargando && restaurantesFiltrados.length === 0" class="empty-state">
+    <ion-badge color="warning">Sin resultados</ion-badge>
+    <h2>No encontramos restaurantes</h2>
+    <p>Prueba otra categoria o ajusta los filtros avanzados.</p>
+  </div>
+
+  <div *ngIf="!cargando && restaurantesFiltrados.length > 0" class="card-stack">
+    <ion-card *ngFor="let r of restaurantesFiltrados" (click)="verDetalle(r)" class="restaurant-card">
+      <img [src]="r.imagen" [alt]="r.nombre" />
+      <ion-card-header>
+        <div class="title-row">
+          <ion-card-title>{{ r.nombre }}</ion-card-title>
+          <ion-badge color="warning" class="rating-badge">★ {{ r.calificacion }}</ion-badge>
+        </div>
+        <ion-card-subtitle>{{ r.categoria }} • {{ r.distancia }}</ion-card-subtitle>
       </ion-card-header>
       <ion-card-content>
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <span style="color: #666;">⭐ <b>{{ restaurante.calificacion }}</b> (120 reseñas)</span>
-          <ion-icon name="chevron-forward-outline" color="medium"></ion-icon>
+        <div class="restaurant-meta">
+          <span>{{ getPrecioVisual(r.precioNivel) }}</span>
+          <span>{{ r.menu[0]?.nombre }}</span>
         </div>
       </ion-card-content>
     </ion-card>
-  </ion-list>
+  </div>
 </ion-content>

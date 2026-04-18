@@ -1,89 +1,152 @@
-```html
-<ion-header [translucent]="true">
+<ion-header class="ion-no-border">
   <ion-toolbar color="warning">
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/home" text="Atrás"></ion-back-button>
+      <ion-back-button defaultHref="/tabs/home"></ion-back-button>
     </ion-buttons>
-    
-    <ion-title>{{ restaurante?.nombre || 'Cargando...' }}</ion-title>
-
+    <ion-title>{{ restaurante?.nombre }}</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="toggleFavorito()" [disabled]="!restaurante">
-        <ion-icon slot="icon-only" [name]="esFavorito ? 'heart' : 'heart-outline'" [color]="esFavorito ? 'danger' : 'dark'"></ion-icon>
+      <ion-button fill="clear" (click)="toggleFavorito()" [disabled]="!restaurante">
+        <ion-icon [name]="esFavorito ? 'heart' : 'heart-outline'" [color]="esFavorito ? 'danger' : 'dark'"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <div *ngIf="restaurante; else cargando">
-    <img [src]="restaurante.imagen" [alt]="restaurante.nombre" style="width: 100%; height: 280px; object-fit: cover;" />
-    
-    <div class="ion-padding">
-      <h1 style="font-weight: 800; margin-top: 0; margin-bottom: 5px;">{{ restaurante.nombre }}</h1>
-      <p style="color: gray; margin-top: 0;">📍 A {{ restaurante.distancia }} de tu ubicación</p>
-      
-      <p style="font-size: 1.1em; line-height: 1.5;">{{ restaurante.descripcion }}</p>
+<ion-content color="light">
+  <div *ngIf="restaurante as data; else cargando" class="detalle-shell">
+    <img class="hero-image" [src]="data.imagen" [alt]="data.nombre" />
 
-      <ion-grid class="ion-no-padding ion-margin-top">
-        <ion-row>
-          <ion-col size="6">
-            <ion-button expand="block" color="success" (click)="irAlLocal()">
-              <ion-icon name="navigate" slot="start"></ion-icon>
-              Ir al local
-            </ion-button>
-          </ion-col>
-          <ion-col size="6">
-            <ion-button expand="block" color="dark" fill="outline" (click)="compartir()">
-              <ion-icon name="share-social" slot="start"></ion-icon>
-              Compartir
-            </ion-button>
-          </ion-col>
-        </ion-row>
-      </ion-grid>
+    <ion-card class="hero-card">
+      <ion-card-header>
+        <ion-card-title>{{ data.nombre }}</ion-card-title>
+        <ion-card-subtitle>{{ data.distancia }} • {{ data.categoria }} • {{ precioVisual }}</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <p class="description">{{ data.descripcion }}</p>
+        <div class="meta-row">
+          <ion-badge color="warning">★ {{ data.calificacion }}</ion-badge>
+          <span *ngIf="sincronizandoResenas" class="sync-state">Sincronizando resenas...</span>
+        </div>
+      </ion-card-content>
+    </ion-card>
 
-      <h2 class="ion-margin-top" style="font-weight: bold;">Reseñas de Voz</h2>
-      <ion-list lines="full">
-        <ion-item>
-          <ion-avatar slot="start">
-            <img src="https://ionicframework.com/docs/img/demos/avatar.svg" />
-          </ion-avatar>
-          <ion-label>
-            <h2>Ana García</h2>
-            <p>⭐ 5.0 • Hace 2 días</p>
-          </ion-label>
-          <ion-button fill="clear" slot="end" color="primary">
-            <ion-icon name="play-circle" style="font-size: 32px;"></ion-icon>
+    <section class="section-block">
+      <h3>Acciones</h3>
+      <div class="actions-grid">
+        <ion-button expand="block" color="success" shape="round" (click)="pedirPorWhatsApp()">
+          <ion-icon name="logo-whatsapp" slot="start"></ion-icon>
+          Pedir por WhatsApp
+        </ion-button>
+        <ion-button expand="block" color="primary" shape="round" (click)="irAlLocal()">
+          <ion-icon name="navigate" slot="start"></ion-icon>
+          Ir al local
+        </ion-button>
+        <ion-button expand="block" color="medium" shape="round" (click)="compartir()">
+          <ion-icon name="share-social" slot="start"></ion-icon>
+          Compartir
+        </ion-button>
+        <ion-button expand="block" color="dark" fill="outline" shape="round" (click)="tomarFoto()">
+          <ion-icon name="camera" slot="start"></ion-icon>
+          Agregar foto
+        </ion-button>
+      </div>
+    </section>
+
+    <section class="section-block">
+      <h3>Promociones exclusivas</h3>
+      <div class="promo-list">
+        <div *ngFor="let promo of data.promociones" class="promo-card">
+          <ion-icon name="gift-outline" color="warning"></ion-icon>
+          <div>
+            <strong>{{ promo.titulo }}</strong>
+            <p>{{ promo.descripcion }}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-block">
+      <h3>Menu digital</h3>
+      <div class="menu-list">
+        <div *ngFor="let item of data.menu" class="menu-card">
+          <div>
+            <strong>{{ item.nombre }}</strong>
+            <p>{{ item.descripcion }}</p>
+          </div>
+          <div class="menu-side">
+            <ion-badge *ngIf="item.destacado" color="warning">Top</ion-badge>
+            <span>RD$ {{ item.precio | number:'1.0-0' }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-block">
+      <h3>Tu resena</h3>
+      <ion-card class="review-form-card">
+        <ion-card-content>
+          <label class="field-label">
+            <span>Nombre</span>
+            <input type="text" [(ngModel)]="nuevaResena.autor" placeholder="Tu nombre" />
+          </label>
+
+          <label class="field-label">
+            <span>Comentario</span>
+            <textarea [(ngModel)]="nuevaResena.comentario" rows="4" placeholder="Cuenta tu experiencia"></textarea>
+          </label>
+
+          <div class="stars-picker">
+            <button type="button" *ngFor="let estrella of estrellasArray()" (click)="setCalificacion(estrella)" class="star-button">
+              <ion-icon [name]="estrella <= nuevaResena.calificacion ? 'star' : 'star-outline'"></ion-icon>
+            </button>
+          </div>
+
+          <img *ngIf="fotoCapturada" [src]="fotoCapturada" class="review-photo-preview" alt="Foto de resena" />
+
+          <ion-button expand="block" color="warning" shape="round" (click)="guardarResena()">
+            Guardar resena
           </ion-button>
-        </ion-item>
-      </ion-list>
+        </ion-card-content>
+      </ion-card>
+    </section>
 
-      <!-- ✅ NUEVO: Mostrar la foto capturada -->
-      <div *ngIf="fotoCapturada" class="ion-margin-top">
-        <h2 style="font-weight: bold;">Tu Foto</h2>
-        <img 
-          [src]="fotoCapturada" 
-          style="width: 100%; border-radius: 12px; box-shadow: 0px 4px 10px rgba(0,0,0,0.2); object-fit: cover; max-height: 300px;" 
-        />
+    <section class="section-block">
+      <h3>Resenas y calificaciones</h3>
+
+      <div *ngIf="cargandoResenas" class="loading-reviews">
+        <ion-skeleton-text animated style="height: 90px;"></ion-skeleton-text>
+        <ion-skeleton-text animated style="height: 90px;"></ion-skeleton-text>
       </div>
 
-    </div>
+      <div *ngIf="!cargandoResenas && resenas.length === 0" class="empty-reviews">
+        <ion-icon name="star-outline"></ion-icon>
+        <p>Aun no hay resenas. Se el primero en dejar una.</p>
+      </div>
+
+      <div *ngIf="!cargandoResenas && resenas.length > 0" class="reviews-list">
+        <ion-card *ngFor="let resena of resenas; trackBy: trackByResena" class="review-card">
+          <ion-card-content>
+            <div class="review-head">
+              <div>
+                <strong>{{ resena.autor }}</strong>
+                <p>{{ resena.fecha | date:'mediumDate' }}</p>
+              </div>
+              <ion-badge color="warning">★ {{ resena.calificacion }}</ion-badge>
+            </div>
+
+            <p class="review-text">{{ resena.comentario }}</p>
+            <img *ngIf="resena.fotoUrl" [src]="resena.fotoUrl" class="review-photo-preview" alt="Foto de resena" />
+            <small *ngIf="resena.pendienteSync" class="pending-label">Pendiente de sincronizacion</small>
+          </ion-card-content>
+        </ion-card>
+      </div>
+    </section>
   </div>
 
   <ng-template #cargando>
-    <div class="ion-padding">
-      <ion-skeleton-text animated style="width: 100%; height: 280px;"></ion-skeleton-text>
-      <ion-skeleton-text animated style="width: 80%; margin-top: 20px; height: 30px;"></ion-skeleton-text>
-      <ion-skeleton-text animated style="width: 60%; height: 20px;"></ion-skeleton-text>
+    <div class="detalle-shell">
+      <ion-skeleton-text animated style="height: 280px; border-radius: 20px;"></ion-skeleton-text>
+      <ion-skeleton-text animated style="height: 120px; margin-top: 12px;"></ion-skeleton-text>
     </div>
   </ng-template>
-
-  <!-- ✅ MODIFICADO: Botón conectado a la cámara -->
-  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-    <ion-fab-button color="warning" (click)="tomarFoto()">
-      <ion-icon name="camera" color="dark"></ion-icon>
-    </ion-fab-button>
-  </ion-fab>
-
 </ion-content>
-```

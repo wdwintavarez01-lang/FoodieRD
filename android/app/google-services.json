@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "490185860414",
+    "project_id": "foodierd-6853b",
+    "storage_bucket": "foodierd-6853b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:490185860414:android:a338ed9ffef29dd846386f",
+        "android_client_info": {
+          "package_name": "io.ionic.starter"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC3tSsg9gXtQxCsYK2BtZMF_8Hu17yMWck"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

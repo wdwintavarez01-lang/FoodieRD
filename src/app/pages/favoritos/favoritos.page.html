@@ -1,0 +1,28 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar color="warning">
+    <ion-title>Mis Favoritos</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content color="light">
+  <div *ngIf="favoritos.length === 0" class="empty-favorites">
+    <ion-icon name="heart-outline"></ion-icon>
+    <h2>Aun no tienes favoritos</h2>
+    <p>Ve a Explorar y guarda los lugares que mas te gusten.</p>
+  </div>
+
+  <div *ngIf="favoritos.length > 0" class="favorites-list">
+    <ion-card *ngFor="let r of favoritos" (click)="verDetalle(r)" class="favorite-card">
+      <img [src]="r.imagen" [alt]="r.nombre" />
+      <ion-card-header>
+        <ion-card-title>
+          {{ r.nombre }}
+          <ion-badge color="warning" class="rating-badge">
+            ★ {{ r.calificacion }}
+          </ion-badge>
+        </ion-card-title>
+        <ion-card-subtitle>{{ r.categoria }} • A {{ r.distancia }}</ion-card-subtitle>
+      </ion-card-header>
+    </ion-card>
+  </div>
+</ion-content>
